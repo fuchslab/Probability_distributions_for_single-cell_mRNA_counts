@@ -1,0 +1,1 @@
+$MY_PYTHON ../D3E/D3ECmd.py simData_control.out results.out G1_1 G1_2 -m 1 -t  216.45s user 0.95s system 99% cpu 3:38.16 total
