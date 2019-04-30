@@ -1,14 +1,14 @@
 # Fit Data and then perform gof
 
 library("scModels")
-#setwd("/storage/groups/biostat01/workspace/Lisa_ProbDistr/PerfectWorld")
+setwd("PerfectWorld")
 
 #Basic Fit
 
 load(file="GenData/Data_basic.Rda")
 i <- as.numeric(commandArgs(TRUE))
 
-
+set.seed(i*5+5)
     #name of listentry
     listname <- paste(paste("Sample ",bquote(.(i))))
     main_data <- Data_basic[[listname]]

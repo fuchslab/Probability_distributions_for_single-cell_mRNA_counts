@@ -1,14 +1,14 @@
 # Fit Data and then perform gof
 
 library("scModels")
-#setwd("/storage/groups/biostat01/workspace/Lisa_ProbDistr/PerfectWorld")
+setwd("PerfectWorld")
 
 #SwitchFit
 
 load(file="GenData/Data_burst.Rda")
 i <- as.numeric(commandArgs(TRUE))
 
-
+set.seed(i*3+3)
     #name of listentry
     listname <- paste(paste("Sample ",bquote(.(i))))
     main_data <- Data_burst[[listname]]
