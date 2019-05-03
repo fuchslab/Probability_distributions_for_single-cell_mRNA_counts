@@ -1,5 +1,6 @@
-import sys, pandas, feather, time
-sys.path.insert(0, "../D3E/")
+import sys, pandas, time
+import numpy as np
+sys.path.insert(0, "D3E/")
 from D3EUtil import readData, getParamsBayesian, getParamsMoments, cramerVonMises, logStatus, goodnessOfFit, distributionTest
 from D3EUtil import Params, BioParams, Status, likelihoodRatio
 
@@ -9,7 +10,10 @@ data2 = data.set_index("GeneID")
 d_moments = list()
 d_bayesian = list()
 
+seed_int = [52538352, 96846493, 5649396, 5847393]
+
 for i in range(1,5):
+  np.random.seed(seed_int[i-1])
   t_s = time.clock()
   params_t = getParamsMoments(data2.loc["SimGene"+`i`, : ])
   t_e = time.clock()
