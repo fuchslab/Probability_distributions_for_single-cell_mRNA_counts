@@ -33,3 +33,28 @@ for(i in 1:1000){
     save(Data_burst, file = "Data_burst.Rda")
 }
 
+
+load(file="Parameter_BasicBurst_BasicBurst_IG.rda")
+
+#Gnerate Basic Burst Data
+
+Data_basic_burst <- list()
+
+for(i in 1:1000){
+    set.seed(4444*i+i+4444)
+    listname <- paste(paste("Sample ",bquote(.(i))))
+    Data_basic_burst[[listname]] <- gmRNA_basic_burst(1000,Parameter_Basic_Burst$trans[i],Parameter_Basic_Burst$burst[i],Parameter_Basic_Burst$size[i], Parameter_Basic_Burst$degr[i])
+    save(Data_basic_burst, file = "Data_basic_burst.Rda")
+}
+
+
+#Gnerate Basic Burst Data
+
+Data_IGbasic_burst <- list()
+
+for(i in 1:1000){
+    set.seed(5555*i+i+5555)
+    listname <- paste(paste("Sample ",bquote(.(i))))
+    Data_IGbasic_burst[[listname]] <- gmRNA_IGbasic_burst(1000,Parameter_IGBasic_Burst$mu[i],Parameter_IGBasic_Burst$burst[i], Parameter_IGBasic_Burst$degr[i])
+    save(Data_IGbasic_burst, file = "Data_IGbasic_burst.Rda")
+}

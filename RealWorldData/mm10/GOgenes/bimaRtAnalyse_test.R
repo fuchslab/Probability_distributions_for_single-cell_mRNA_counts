@@ -3,29 +3,31 @@
 library(biomaRt)
 mart <- useMart(biomart ="ensembl", dataset="mmusculus_gene_ensembl")
 mart2 <- useMart(biomart ="ensembl", dataset="mmusculus_gene_ensembl",host = "www.ensembl.org")
+mart3 <- useEnsembl(biomart ="ensembl", dataset="mmusculus_gene_ensembl")
+
 
 
 load(file="Fits_mm10_all.rda")
 
-Pois_prev <-colnames(Fits_mm10_all_DataFrame)[Fits_mm10_all_DataFrame["BIC_smallest",]=="pois"]
+Pois_prev <-rownames(Fits_mm10_all)[Fits_mm10_all["BIC_smallest"]=="Pois"]
 Pois <- substr(Pois_prev, 6,23 )
 
-Pois_prev_gof <- colnames(Fits_mm10_all_DataFrame)[Fits_mm10_all_DataFrame["BIC_smallest",]=="pois" & Fits_mm10_all_DataFrame["x2_adj",]==TRUE]
+Pois_prev_gof <- rownames(Fits_mm10_all)[Fits_mm10_all["BIC_smallest"] == "Pois" & Fits_mm10_all["x2_adj"]==TRUE]
 Pois_gof <- substr(Pois_prev_gof, 6,23 )
 
-Non_Pois_prev <- colnames(Fits_mm10_all_DataFrame)[Fits_mm10_all_DataFrame["BIC_smallest",]!="pois"]
+Non_Pois_prev <- rownames(Fits_mm10_all)[Fits_mm10_all["BIC_smallest"] != "Pois"]
 Non_Pois <- substr(Non_Pois_prev, 6,23 )
 
-Non_Pois_prev_gof <- colnames(Fits_mm10_all_DataFrame)[Fits_mm10_all_DataFrame["BIC_smallest",]!="pois"& Fits_mm10_all_DataFrame["x2_adj",]==TRUE]
+Non_Pois_prev_gof <- rownames(Fits_mm10_all)[Fits_mm10_all["BIC_smallest"] != "Pois" & Fits_mm10_all["x2_adj"]==TRUE]
 Non_Pois_gof <- substr(Non_Pois_prev_gof, 6,23 )
 
 # Get all the GO Terms a Gene is present in
 GO_terms <- list()
 for(i in 1:length(Pois)){
-    GO_terms[[i]] <- getBM(attributes = c("go_id","name_1006","definition_1006","namespace_1003"), filters="ensembl_gene_id", values = Pois[i], mart = mart)
+    GO_terms[[i]] <- getBM(attributes = c("go_id","name_1006","definition_1006","namespace_1003"), filters="ensembl_gene_id", values = Pois[i], mart = mart3)
     names(GO_terms)[i] <- Pois[i]
 }
-
+#it works for me now by switching out 'useDataset/useMart' with 'useEnsembl'! Thanks. 
 
 GO_terms_gof <- list()
 for(i in Pois_gof){
@@ -50,8 +52,8 @@ for(i in Pois_gof){
 # Those had to be started manually again because of biomaRT server error:
 # 3705 3842  3843 3865 3868 3873 3880 3903 3909 3923(einfach nochmal ausführen geht)
 GO_terms_NP <- list()
-for(i in 1:length(Non_Pois)){
-    GO_terms_NP[[i]] <- getBM(attributes = c("go_id","name_1006","definition_1006","namespace_1003"), filters="ensembl_gene_id", values = Non_Pois[i], mart = mart)
+for(i in 1347:length(Non_Pois)){
+    GO_terms_NP[[i]] <- getBM(attributes = c("go_id","name_1006","definition_1006","namespace_1003"), filters="ensembl_gene_id", values = Non_Pois[i], mart = mart3)
     names(GO_terms_NP)[i] <- Non_Pois[i]
 }
 
@@ -94,8 +96,8 @@ Which_BP30 <- list()
 Which_MF15 <- list()
 for(i in Pois){
 Parents[[i]] <- try(GOfuncR::get_parent_nodes(GO_terms[[i]]$go_id, term_df = NULL, graph_path_df = NULL, godir = NULL))
-Which_BP30[[i]] <- try(GO_BP30[GO_BP30 %in% Parents[[i]]$parent_go_id])
-Which_MF15[[i]] <- try(GO_MF15[GO_MF15 %in% Parents[[i]]$parent_go_id])
+Which_BP30[[i]] <- try(GO_BP30[GO_BP30 %in% Parents[[i]]$parent_go_id], silent = TRUE)
+Which_MF15[[i]] <- try(GO_MF15[GO_MF15 %in% Parents[[i]]$parent_go_id], silent = TRUE)
 }
 
 Parents_NP <- list()
@@ -103,8 +105,8 @@ Which_BP30_NP <- list()
 Which_MF15_NP <- list()
 for(i in Non_Pois){
     Parents_NP[[i]] <- try(GOfuncR::get_parent_nodes(GO_terms_NP[[i]]$go_id, term_df = NULL, graph_path_df = NULL, godir = NULL))
-    Which_BP30_NP[[i]] <- try(GO_BP30[GO_BP30 %in% Parents_NP[[i]]$parent_go_id])
-    Which_MF15_NP[[i]] <- try(GO_MF15[GO_MF15 %in% Parents_NP[[i]]$parent_go_id])
+    Which_BP30_NP[[i]] <- try(GO_BP30[GO_BP30 %in% Parents_NP[[i]]$parent_go_id], silent = TRUE)
+    Which_MF15_NP[[i]] <- try(GO_MF15[GO_MF15 %in% Parents_NP[[i]]$parent_go_id], silent = TRUE)
 }
 
 #Again the same for genes that passed GOF
@@ -168,20 +170,40 @@ table(BP30_Nr)
 # 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 17
 #41 22 46 51 59 27 30 26 14 19 10  7  8  1  3  2  2
 
+# Neu 
+#BP30_Nr
+#  0  1  2  3  4  5  6  7  8  9 10 11 12 14 15 
+# 16 10 22 26 27 11 20 17  9  9  5  4  5  2  1 
+
 table(MF15_Nr)
 # MF15_Nr
 #   0   1   2   3
 # 182 160  23   3
+
+# Neu
+#MF15_Nr
+#  0  1  2  3 
+# 90 88  5  1 
 
 table(BP30_Nr_gof)
 # BP30_Nr_gof
 #  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 17
 # 43 22 46 51 58 27 30 26 14 18 10  7  8  1  3  2  2
 
+# Neu
+#BP30_Nr_gof
+#  0  1  2  3  4  5  6  7  8  9 10 11 12 14 15 
+# 17 10 22 26 26 11 20 17  9  9  5  4  5  2  1 
+
 table(MF15_Nr_gof)
 # MF15_Nr_gof
 #   0   1   2   3
 # 184 158  23   3
+
+# Neu
+#MF15_Nr_gof
+#  0  1  2  3 
+# 91 87  5  1 
 
 ### same for Non Poisson Genes
 table(BP30_Nr_NP)
@@ -189,20 +211,40 @@ table(BP30_Nr_NP)
 #   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18
 # 343 225 535 587 415 351 300 239 257 182 130 116  91  69  28  24  20  11   6
 
+# Neu
+#BP30_Nr_NP
+#   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19 
+# 339 222 544 585 458 395 313 272 247 208 140 122  97  67  32  32  22  11   6   1 
+
 table(MF15_Nr_NP)
 # MF15_Nr_NP
 #    0    1    2    3    4    5
 # 1675 1943  286   23    1    1
+
+# Neu
+#MF15_Nr_NP
+#    0    1    2    3    5 
+# 1771 2039  279   23    1 
 
 table(BP30_Nr_NP_gof)
 # BP30_Nr_NP_gof
 #   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18
 # 434 223 511 566 406 345 290 234 256 179 128 113  89  66  28  24  20  11   6
 
+# Neu
+# BP30_Nr_NP_gof
+#   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19 
+# 378 219 540 574 452 391 310 269 246 207 140 122  97  65  31  32  22  11   6   1 
+
 table(MF15_Nr_NP_gof)
 # MF15_Nr_NP_gof
 #    0    1    2    3    4    5
 # 1749 1882  273   23    1    1
+
+# Neu
+MF15_Nr_NP_gof
+#    0    1    2    3    5 
+# 1801 2016  272   23    1 
 
 # GO of higest hierarchy and number of contained genes
 
@@ -213,15 +255,15 @@ table(unlist(Which_BP30_NP))
 table(unlist(Which_MF15_NP))
 
 
-100/368 *3929
-50/368 *3929
-30/368 *3929
-1/368 *3929
-round(table(unlist(Which_BP30))/368*100,2)
-round(table(unlist(Which_MF15))/368*100,2)
+100/184 * 4113
+50/184 * 4113
+30/184 * 4113
+1/184 * 4113
+round(table(unlist(Which_BP30))/184*100,2)
+round(table(unlist(Which_MF15))/184*100,2)
 
-round(table(unlist(Which_BP30_NP))/3929*100,2)
-round(table(unlist(Which_MF15_NP))/3929*100,2)
+round(table(unlist(Which_BP30_NP))/4113*100,2)
+round(table(unlist(Which_MF15_NP))/4113*100,2)
 
 #same after GOF
 table(unlist(Which_BP30_gof))
@@ -230,25 +272,31 @@ table(unlist(Which_MF15_gof))
 table(unlist(Which_BP30_NP_gof))
 table(unlist(Which_MF15_NP_gof))
 
+100/366 * 183
+50/366 * 183
+30/366 * 183
+1/366 * 183
 
-100/366 *3837
-50/366 *3837
-30/366 *3837
-1/366 *3837
-round(table(unlist(Which_BP30))/366*100,2)
-round(table(unlist(Which_MF15))/366*100,2)
 
-round(table(unlist(Which_BP30_NP))/3837*100,2)
-round(table(unlist(Which_MF15_NP))/3837*100,2)
+
+50/183 * 4074
+25/183 * 4074
+15/183 * 4074
+1/183 * 4074
+round(table(unlist(Which_BP30))/183 * 100,2)
+round(table(unlist(Which_MF15))/183 * 100,2)
+
+round(table(unlist(Which_BP30_NP))/4074 * 100,2)
+round(table(unlist(Which_MF15_NP))/4074 * 100,2)
 
 
 # Barplots of higest hierarchy
-A <- factor(BP30_Nr, levels = 0:18)
+A <- factor(BP30_Nr, levels = 0:19)
 svg(paste0( "Barplot_Pois_BP30.svg"),  width = 7, height = 8)
 barplot(table(A))
 dev.off()
 
-A_NP <- factor(BP30_Nr_NP, levels = 0:18)
+A_NP <- factor(BP30_Nr_NP, levels = 0:19)
 svg(paste0( "Barplot_NonPois_BP30.svg"),  width = 7, height = 8)
 barplot(table(A_NP))
 dev.off()
@@ -264,12 +312,12 @@ barplot(table(B_NP))
 dev.off()
 
 # after GOF
-A_gof <- factor(BP30_Nr_gof, levels = 0:18)
+A_gof <- factor(BP30_Nr_gof, levels = 0:19)
 svg(paste0( "Barplot_Pois_BP30_gof.svg"),  width = 7, height = 8)
 barplot(table(A_gof))
 dev.off()
 
-A_NP_gof <- factor(BP30_Nr_NP_gof, levels = 0:18)
+A_NP_gof <- factor(BP30_Nr_NP_gof, levels = 0:19)
 svg(paste0( "Barplot_NonPois_BP30_gof.svg"),  width = 7, height = 8)
 barplot(table(A_NP_gof))
 dev.off()
@@ -323,7 +371,7 @@ lines(density(GO_terms_NP_Nr_gof, bw=2), col ="red")
 
 #### Add on Hub Genes Plot Gene importance:
 
-Connections_075<-read.table("network_075.tsv", sep ="\t")
+Connections_075<-read.table("network_075.zip/network_075.tsv", sep ="\t")
 
 Pois_Connections_075 <- rep(0, length(Pois))
 for(i in 1:length(Pois)){

@@ -1,0 +1,136 @@
+
+
+load(file="DistributionFits/GOF/p_gof_pois.rda")
+p_x2_pois <- p_x2
+p_ks_pois <- p_ks
+load(file="DistributionFits/GOF/p_gof_nb.rda")
+p_x2_nb <- p_x2
+p_ks_nb <- p_ks
+load(file="DistributionFits/GOF/p_gof_pb.rda")
+p_x2_pb <- p_x2
+p_ks_pb <- p_ks
+load(file="DistributionFits/GOF/p_gof_pig.rda")
+p_x2_pig <- p_x2
+p_ks_pig <- p_ks
+load(file="DistributionFits/GOF/p_gof_zipois.rda")
+p_x2_zipois <- p_x2
+p_ks_zipois <- p_ks
+load(file="DistributionFits/GOF/p_gof_zinb.rda")
+p_x2_zinb <- p_x2
+p_ks_zinb <- p_ks
+load(file="DistributionFits/GOF/p_gof_zipig.rda")
+p_x2_zipig <- p_x2
+p_ks_zipig <- p_ks
+load(file="DistributionFits/GOF/p_gof_zipb.rda")
+p_x2_zipb <- p_x2
+p_ks_zipb <- p_ks
+load(file="DistributionFits/GOF/p_gof_pois2.rda")
+p_x2_pois2 <- p_x2
+p_ks_pois2 <- p_ks
+load(file="DistributionFits/GOF/p_gof_nb2.rda")
+p_x2_nb2 <- p_x2
+p_ks_nb2 <- p_ks
+load(file="DistributionFits/GOF/p_gof_pig2.rda")
+p_x2_pig2 <- p_x2
+p_ks_pig2 <- p_ks
+load(file="DistributionFits/GOF/p_gof_pb2.rda")
+p_x2_pb2 <- p_x2
+p_ks_pb2 <- p_ks
+load(file="DistributionFits/GOF/p_gof_zipois2.rda")
+p_x2_zipois2 <- p_x2
+p_ks_zipois2 <- p_ks
+load(file="DistributionFits/GOF/p_gof_zinb2.rda")
+p_x2_zinb2 <- p_x2
+p_ks_zinb2 <- p_ks
+load(file="DistributionFits/GOF/p_gof_zipig2.rda")
+p_x2_zipig2 <- p_x2
+p_ks_zipig2 <- p_ks
+load(file="DistributionFits/GOF/p_gof_zipb2.rda")
+
+library(rlist)
+
+p_x2 <- c(p_x2[names(which(comparison_all_name=="zipb2"))],p_x2_pois[names(which(comparison_all_name=="pois"))],p_x2_nb[names(which(comparison_all_name=="nb"))],p_x2_pig[names(which(comparison_all_name=="pig"))],p_x2_pb[names(which(comparison_all_name=="pb"))],p_x2_zipois[names(which(comparison_all_name=="zipois"))],p_x2_zinb[names(which(comparison_all_name=="zinb"))],p_x2_zipig[names(which(comparison_all_name=="zipig"))],p_x2_zipb[names(which(comparison_all_name=="zipb"))],p_x2_pois2[names(which(comparison_all_name=="pois2"))],p_x2_nb2[names(which(comparison_all_name=="nb2"))],p_x2_pig2[names(which(comparison_all_name=="pig2"))],p_x2_pb2[names(which(comparison_all_name=="pb2"))],p_x2_zipois2[names(which(comparison_all_name=="zipois2"))],p_x2_zinb2[names(which(comparison_all_name=="zinb2"))],p_x2_zipig2[names(which(comparison_all_name=="zipig2"))])
+p_ks <- c(p_ks[names(which(comparison_all_name=="zipb2"))],p_ks_pois[names(which(comparison_all_name=="pois"))],p_ks_nb[names(which(comparison_all_name=="nb"))],p_ks_pb[names(which(comparison_all_name=="pb"))],p_ks_pig[names(which(comparison_all_name=="pig"))],p_ks_zipois[names(which(comparison_all_name=="zipois"))],p_ks_zinb[names(which(comparison_all_name=="zinb"))],p_ks_zipig[names(which(comparison_all_name=="zipig"))],p_ks_zipb[names(which(comparison_all_name=="zipb"))],p_ks_pois2[names(which(comparison_all_name=="pois2"))],p_ks_nb2[names(which(comparison_all_name=="nb2"))],p_ks_pig2[names(which(comparison_all_name=="pig2"))],p_ks_pb2[names(which(comparison_all_name=="pb2"))],p_ks_zipois2[names(which(comparison_all_name=="zipois2"))],p_ks_zinb2[names(which(comparison_all_name=="zinb2"))],p_ks_zipig2[names(which(comparison_all_name=="zipig2"))])
+
+save(p_ks,p_x2,file="DistributionFits/GOF/p_gof_all.rda")
+
+################################################
+
+load(file="DistributionFits/GOF/GOF_input.rds")
+
+GOF_ks <- list()
+GOF_x2 <- list()
+for(id in names(p_ks)){
+    GOF_ks[[id]] <- p_ks[[id]]$p.value
+    GOF_x2[[id]] <- p_x2[[id]]$p.value
+}
+
+
+H1<-merge(as.data.frame(unlist(GOF_ks), row.names=names(GOF_ks)),as.data.frame(unlist(GOF_x2), row.names=names(GOF_x2)), by = 0, all = TRUE)
+
+H2<-merge(as.data.frame(comparison_all_name, row.names=names(comparison_all_name)),as.data.frame(H1[,2:3], row.names = H1[,1]), by = 0, all = TRUE)
+
+Nestorowa_GOF <- as.data.frame(H2[2:4], row.names = H2[,1])
+
+#calculate if p-values are lower than adjusted alpha.
+Nestorowa_GOF$x2_adj <- Nestorowa_GOF$`unlist(GOF_x2)`> 0.05/length(row.names(Nestorowa_GOF))
+
+sum(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="pois"])
+plot(Nestorowa_GOF$`unlist(GOF_x2)`[Nestorowa_GOF$comparison_all_name=="pois"])
+
+sum(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="nb"])
+plot(Nestorowa_GOF$`unlist(GOF_x2)`[Nestorowa_GOF$comparison_all_name=="nb"])
+
+sum(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="pig"])
+plot(Nestorowa_GOF$`unlist(GOF_x2)`[Nestorowa_GOF$comparison_all_name=="pig"])
+
+
+sum(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="pb"][!is.na(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="pb"])])
+plot(Nestorowa_GOF$`unlist(GOF_x2)`[Nestorowa_GOF$comparison_all_name=="pb"])
+
+sum(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="pois2"])
+plot(Nestorowa_GOF$`unlist(GOF_x2)`[Nestorowa_GOF$comparison_all_name=="pois2"])
+
+sum(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="nb2"])
+plot(Nestorowa_GOF$`unlist(GOF_x2)`[Nestorowa_GOF$comparison_all_name=="nb2"])
+
+sum(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="pig2"])
+plot(Nestorowa_GOF$`unlist(GOF_x2)`[Nestorowa_GOF$comparison_all_name=="pig2"])
+
+sum(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="pb2"][!is.na(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="pb2"])])
+plot(Nestorowa_GOF$`unlist(GOF_x2)`[Nestorowa_GOF$comparison_all_name=="pb2"])
+
+
+sum(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="zipois"])
+plot(Nestorowa_GOF$`unlist(GOF_x2)`[Nestorowa_GOF$comparison_all_name=="zipois"])
+
+sum(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="zinb"])
+plot(Nestorowa_GOF$`unlist(GOF_x2)`[Nestorowa_GOF$comparison_all_name=="zinb"])
+
+sum(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="zipig"])
+plot(Nestorowa_GOF$`unlist(GOF_x2)`[Nestorowa_GOF$comparison_all_name=="zipig"])
+
+sum(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="zipb"])
+plot(Nestorowa_GOF$`unlist(GOF_x2)`[Nestorowa_GOF$comparison_all_name=="zipb"])
+
+sum(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="zipois2"])
+plot(Nestorowa_GOF$`unlist(GOF_x2)`[Nestorowa_GOF$comparison_all_name=="zipois2"])
+
+sum(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="zinb2"])
+plot(Nestorowa_GOF$`unlist(GOF_x2)`[Nestorowa_GOF$comparison_all_name=="zinb2"])
+
+
+sum(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="zipig2"])
+plot(Nestorowa_GOF$`unlist(GOF_x2)`[Nestorowa_GOF$comparison_all_name=="zipig2"])
+
+sum(Nestorowa_GOF$x2_adj[Nestorowa_GOF$comparison_all_name=="zipb2"])
+plot(Nestorowa_GOF$`unlist(GOF_x2)`[Nestorowa_GOF$comparison_all_name=="zipb2"])
+
+
+save(Nestorowa_GOF, file="DistributionFits/GOF/Result_Nestorowa_BIC_GOF.rda")
+
+
+
+
+
+

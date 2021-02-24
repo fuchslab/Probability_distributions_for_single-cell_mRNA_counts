@@ -27,23 +27,31 @@ trans <- unique(c(on,act))
 Para_Basic <- expand.grid(trans, degr)
 names(Para_Basic) <- c("trans", "degr")
 
+# Range for Parameters of the basic burst model
+
+Para_Basic_Burst <- expand.grid(trans, burst, burst_size, degr)
+names(Para_Basic_Burst) <- c("trans","burst","size", "degr")
+
+# Range for Parameters of the IG basic burst model
+
+mu <- trans
+burst2 <-  unique(trans, seq(0.5,3, by = 0.25))
+Para_IGBasic_Burst <- expand.grid(mu, burst2, degr)
+names(Para_IGBasic_Burst) <- c("mu","burst", "degr")
 
 
 # Sample 1000 Parametersets
 
-set.seed(10)
-n_Switch <- sample(dim(Para_Switch)[1], 1000)
-Parameter_Switch <- Para_Switch[n_Switch,]
+set.seed(40)
+n_Basic_Burst <- sample(dim(Para_Basic_Burst)[1], 1000)
+Parameter_Basic_Burst<- Para_Basic_Burst[n_Basic_Burst,]
 
-set.seed(20)
-n_Burst <- sample(dim(Para_Burst)[1], 1000)
-Parameter_Burst <- Para_Burst[n_Burst,]
+set.seed(50)
+n_IGBasic_Burst <- sample(dim(Para_IGBasic_Burst)[1], 1000)
+Parameter_IGBasic_Burst<- Para_IGBasic_Burst[n_IGBasic_Burst,]
 
-set.seed(30)
-n_Basic <- sample(dim(Para_Basic)[1], 1000)
-Parameter_Basic<- Para_Basic[n_Basic,]
 
-save(Parameter_Basic, Parameter_Switch, Parameter_Burst, file="Parameter_BasicSwitchBurst.rda")
+save(Parameter_Basic_Burst,Parameter_IGBasic_Burst, file="Parameter_BasicBurst_BasicBurst_IG.rda")
 
 
 
